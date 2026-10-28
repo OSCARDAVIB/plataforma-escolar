@@ -216,26 +216,24 @@
             lista.innerHTML = tareas.map(t => {
                 const miEntrega = entregas.find(e => e.tareaId === t.id && e.emailEstudiante === miEmail);
 
-                let zona = '';
-                if (miEntrega) {
-                    if (miEntrega.calificacion !== null) {
-                        zona = `<div class="estado-ok" style="background:#d1fae5; border:1px solid #10b981;">
-                            ✅ Entregado: <strong>${miEntrega.nombreArchivo}</strong><br><br>
-                            ⭐ <strong>Nota: ${parseFloat(miEntrega.calificacion).toFixed(1)}/5</strong><br>
-                            💬 <em>${miEntrega.retroalimentacion || 'Sin comentarios'}</em>
-                        </div>`;
-                    } else {
-                        zona = `<div class="estado-ok">
-                            ✅ Ya entregaste: <strong>${miEntrega.nombreArchivo}</strong><br>
-                            <small>⏳ Esperando calificación...</small>
-                        </div>`;
-                    }
+                                let zona = '';
+                if (miEntrega) { 
+                    // ... (deja igual lo que ya tienes en el if) ...
                 } else {
-                    zona = `
-                        <input type="file" id="archivo-${t.id}">
-                        <textarea id="comentario-${t.id}" placeholder="Comentario (opcional)..."></textarea>
-                        <button class="boton-subir" onclick="subirEntrega(${t.id})">Subir entrega</button>
-                    `;
+                    // Si la descripción dice "EN CLASE" o "CUADERNO", mostramos un aviso
+                    const esTareaDeCuaderno = (t.descripcion || '').toUpperCase().includes('EN CLASE') || (t.descripcion || '').toUpperCase().includes('CUADERNO');
+                    
+                    if (esTareaDeCuaderno) {
+                        zona = `<div style="background:#fef3c7; color:#92400e; padding:10px; border-radius:6px; font-size:13px; text-align:center;">
+                                    📝 Esta tarea se entrega en el cuaderno físico en clase.
+                                </div>`;
+                    } else {
+                        zona = `
+                            <input type="file" id="archivo-${t.id}">
+                            <textarea id="comentario-${t.id}" placeholder="Comentario (opcional)..."></textarea>
+                            <button class="boton-subir" onclick="subirEntrega(${t.id})">Subir entrega</button>
+                        `;
+                    }
                 }
 
                 return `
