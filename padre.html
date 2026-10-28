@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Padre de Familia</title>
+    
+    <!-- Librerías para generar el PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Barra Superior */
+        .barra {
+            background: #9333ea; color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .barra h1 { font-size: 20px; }
+        .barra button {
+            background: white; color: #9333ea; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
+        }
+        .barra button:hover { background: #f3e8ff; }
+
+        /* Menú de Pestañas */
+        .menu-tabs {
+            background: white; padding: 0 30px; display: flex; gap: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 15px 20px;
+            font-size: 15px; font-weight: bold; color: #64748b; cursor: pointer;
+            border-bottom: 3px solid transparent; transition: 0.2s;
+        }
+        .tab-btn:hover { color: #9333ea; background: #faf5ff; }
+        .tab-btn.active { color: #9333ea; border-bottom-color: #9333ea; }
+
+        /* Contenedor Principal */
+        .contenido { flex: 1; max-width: 900px; margin: 30px auto; padding: 0 20px; width: 100%; }
+        
+        /* Secciones */
+        .seccion { display: none; animation: fadeIn 0.3s; }
+        .seccion.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas Generales */
+        .tarjeta {
+            background: white; padding: 25px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .tarjeta h2 { color: #1e293b; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;}
+
+        /* =========================================
+           ESTILOS DE TAREAS (TARJETAS EN CUADRÍCULA)
+           ========================================= */
+        .grid-tareas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .tarea-item {
+            background: #faf5ff; border-left: 4px solid #9333ea;
+            padding: 15px; border-radius: 6px;
+            display: flex; flex-direction: column;
+        }
+        .tarea-item h3 { color: #581c87; margin-bottom: 5px; font-size: 16px; }
+        .tarea-item p { color: #6b21a8; font-size: 14px; margin-bottom: 8px; flex-grow: 1; }
+        .tarea-item .fecha { font-size: 13px; color: #dc2626; font-weight: bold; }
+        
+        /* Estados de entrega */
+        .estado-entrega { margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 14px; }
+        .estado-pendiente { background: #fee2e2; color: #991b1b; }
+        .estado-entregado { background: #fef3c7; color: #92400e; }
+        .estado-calificado { background: #dcfce7; color: #14532d; }
+        .nota-grande { font-size: 20px; font-weight: bold; }
+
+        /* Botón de PDF */
+        .btn-pdf {
+            margin-top: 20px; background: #9333ea; color: white; 
+            padding: 15px; border: none; border-radius: 8px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+            width: 100%; transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(147, 51, 234, 0.2);
+        }
+        .btn-pdf:hover { background: #7e22ce; transform: translateY(-2px); }
+
+        /* Utilidades */
+        .vacio { color: #94a3b8; text-align: center; padding: 20px; font-style: italic; }
+        .cargando { color: #9333ea; text-align: center; padding: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="barra">
+        <h1>👨‍👩‍👧 Panel de Acudiente</h1>
+        <button onclick="salir()">Cerrar sesión</button>
+    </div>
+
+    <!-- MENÚ DE PESTAÑAS -->
+    <div class="menu-tabs">
+        <button class="tab-btn active" onclick="cambiarTab('inicio', event)">🏠 Inicio</button>
+        <button class="tab-btn" onclick="cambiarTab('boletin', event)">📄 Boletín</button>
+        <button class="tab-btn" onclick="cambiarTab('tareas', event)">📚 Tareas</button>
+    </div>
+
+    <div class="contenido">
+
+        <!-- ==================== SECCIÓN: INICIO ==================== -->
+        <div id="sec-inicio" class="seccion active">
+            <div class="tarjeta">
+                <h2>Bienvenido/a</h2>
+                <p style="color:#64748b; line-height:1.6; font-size: 16px;">
+                    Estás viendo el progreso académico de:<br><br>
+                    <strong id="nombreHijoInicio" style="font-size: 20px; color: #9333ea;">Cargando...</strong>
+                </p>
+                <hr style="margin: 20px 0; border: 1px dashed #cbd5e1;">
+                <p style="color:#64748b; line-height:1.6;">
+                    Usa las pestañas superiores para ver las tareas asignadas o para descargar el boletín oficial de calificaciones.
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== SECCIÓN: BOLETÍN ==================== -->
+        <div id="sec-boletin" class="seccion">
+            <div class="tarjeta" style="text-align: center;">
+                <h2>📄 Boletín Oficial de Calificaciones</h2>
+                <p style="color:#64748b; margin-bottom: 20px; font-size: 14px;">
+                    Haz clic en el botón de abajo para generar y descargar el boletín en formato PDF con todas las notas del año escolar.
+                </p>
+                
+                <div style="font-size: 60px; margin: 20px 0;">📑</div>
+
+                <button class="btn-pdf" onclick="descargarBoletin()">
+                    ⬇️ Descargar Boletín en PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== SECCIÓN: TAREAS ==================== -->
+        <div id="sec-tareas" class="seccion">
+            <div class="tarjeta">
+                <h2>📚 Progreso de Tareas de <span id="nombreHijoTareas" style="color: #9333ea;">...</span></h2>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                    Vista de solo lectura de las tareas asignadas.
+                </p>
+                <div id="listaTareas" class="grid-tareas">
+                    <p class="cargando">Cargando tareas...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Validar seguridad
+        if (localStorage.getItem('rol') !== 'padre') {
+            alert('Debes iniciar sesión como padre de familia');
+            window.location.href = 'index.html';
+        }
+
+        // 2. Lógica de las Pestañas
+        function cambiarTab(idTab, evento) {
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('sec-' + idTab).classList.add('active');
+            if (evento) evento.target.classList.add('active');
+        }
+
+        // 3. Llamadas iniciales
+        cargarTareas();
+        cargarInfoHijo();
+
+        // ==========================================
+        // FUNCIÓN PARA MOSTRAR EL NOMBRE DEL HIJO
+        // ==========================================
+        async function cargarInfoHijo() {
+            const emailPadre = localStorage.getItem('email');
+            if (!emailPadre) return;
+
+            try {
+                const res = await fetch('/api/mi-hijo/' + encodeURIComponent(emailPadre));
+                
+                if (res.ok) {
+                    const estudiante = await res.json();
+                    const nombreCompleto = `${estudiante.nombres} ${estudiante.apellidos}`;
+                    document.getElementById('nombreHijoInicio').textContent = nombreCompleto;
+                    document.getElementById('nombreHijoTareas').textContent = nombreCompleto;
+                } else {
+                    document.getElementById('nombreHijoInicio').textContent = 'Estudiante no asociado';
+                    document.getElementById('nombreHijoInicio').style.color = '#dc2626';
+                    document.getElementById('nombreHijoTareas').textContent = 'No asociado';
+                    document.getElementById('nombreHijoTareas').style.color = '#dc2626';
+                }
+            } catch (error) {
+                console.error('Error al cargar info del hijo', error);
+            }
+        }
+
+        // ==========================================
+        // FUNCIÓN PARA VER EL PROGRESO (Tareas/Entregas)
+        // ==========================================
+        async function cargarTareas() {
+            try {
+                const resTareas = await fetch('/api/tareas');
+                const tareas = await resTareas.json();
+
+                const resEntregas = await fetch('/api/entregas');
+                const entregas = await resEntregas.json();
+
+                mostrarProgreso(tareas, entregas);
+            } catch (error) {
+                document.getElementById('listaTareas').innerHTML = '<p class="vacio">Error de conexión con el servidor</p>';
+            }
+        }
+
+        function mostrarProgreso(tareas, entregas) {
+            const lista = document.getElementById('listaTareas');
+
+            if (tareas.length === 0) {
+                lista.innerHTML = '<p class="vacio">Aún no hay tareas registradas</p>';
+                return;
+            }
+
+            tareas.sort((a, b) => b.id - a.id);
+
+            lista.innerHTML = tareas.map(t => {
+                const entrega = entregas.find(e => e.tareaId === t.id);
+                
+                let estado = '';
+                if (!entrega) {
+                    estado = '<div class="estado-entrega estado-pendiente">⏳ Pendiente de entrega</div>';
+                } else if (entrega.calificacion === null) {
+                    estado = '<div class="estado-entrega estado-entregado">📤 Entregada — esperando calificación</div>';
+                } else {
+                    estado = `<div class="estado-entrega estado-calificado">
+                        ✅ Calificada — Nota: <span class="nota-grande">${parseFloat(entrega.calificacion).toFixed(1)}/5</span>
+                        <br><small>💬 ${entrega.retroalimentacion || 'Sin comentarios'}</small>
+                    </div>`;
+                }
+
+                // Estructura con flex-grow para empujar el estado hacia abajo
+                return `
+                    <div class="tarea-item">
+                        <h3>${t.titulo}</h3>
+                        <p>${t.descripcion || 'Sin descripción'}</p>
+                        <span class="fecha" style="margin-bottom: 10px;">📅 Entrega: ${t.fecha || 'Sin fecha'}</span>
+                        <div style="margin-top: auto;">
+                            ${estado}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==========================================
+        // FUNCIÓN PARA GENERAR EL BOLETÍN PDF
+        // ==========================================
+        async function descargarBoletin() {
+            try {
+                const emailPadre = localStorage.getItem('email');
+                if (!emailPadre) { alert('No se encontró la sesión'); return; }
+
+                const resHijo = await fetch('/api/mi-hijo/' + encodeURIComponent(emailPadre));
+                
+                if (!resHijo.ok) {
+                    alert('No se encontró ningún estudiante asociado a tu correo. Pide al docente que registre tu correo como acudiente.');
+                    return;
+                }
+                
+                const estudiante = await resHijo.json();
+
+                const resNotas = await fetch('/api/notas/' + estudiante.email);
+                const notas = await resNotas.json();
+
+                const resInst = await fetch('/api/institucion');
+                const inst = await resInst.json();
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'letter');
+                
+                const limpiar = (texto) => texto ? texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
+
+                if (inst.logo_url) {
+                    try {
+                        const imgLogo = await loadImageAsBase64(inst.logo_url);
+                        doc.addImage(imgLogo, 'PNG', 15, 12, 20, 20); 
+                    } catch (e) { console.log('Error logo:', e); }
+                }
+                if (inst.escudo_url) {
+                    try {
+                        const imgEscudo = await loadImageAsBase64(inst.escudo_url);
+                        doc.addImage(imgEscudo, 'PNG', 175, 12, 20, 20); 
+                    } catch (e) { console.log('Error escudo:', e); }
+                }
+
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11); 
+                doc.text(limpiar(inst.nombre || 'INSTITUCION EDUCATIVA'), 105, 18, { align: "center" });
+                
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "normal");
+                doc.text(`NIT: ${inst.nit || '____'} - DANE: ${inst.dane || '____'}`, 105, 23, { align: "center" });
+                doc.text(`Aprobado por Resolución N° ${inst.resolucion || '____'}`, 105, 27, { align: "center" });
+                doc.text(`${inst.direccion || ''} | Tel: ${inst.telefono || ''}`, 105, 31, { align: "center" });
+                
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.line(15, 38, 195, 38);
+                doc.text("INFORME DE NOTAS POR PERIODOS", 105, 44, { align: "center" });
+                doc.line(15, 48, 195, 48);
+
+                doc.setFontSize(10);
+                doc.text(`APELLIDOS Y NOMBRES: ${limpiar(estudiante.apellidos.toUpperCase())} ${limpiar(estudiante.nombres.toUpperCase())}`, 15, 58);
+                doc.text(`CURSO: ${estudiante.curso || '____'}`, 15, 65);
+                doc.text(`AÑO: ${new Date().getFullYear()}`, 160, 65);
+
+                const porMateria = {};
+                notas.forEach(n => {
+                    if (!porMateria[n.materia]) porMateria[n.materia] = { 1: '-', 2: '-', 3: '-', 4: '-' };
+                    porMateria[n.materia][n.periodo] = parseFloat(n.nota).toFixed(1);
+                });
+
+                const pesos = { 1: 0.15, 2: 0.20, 3: 0.30, 4: 0.35 };
+                const filasTabla = [];
+
+                for (const materia in porMateria) {
+                    let sumaPonderada = 0;
+                    for (let p = 1; p <= 4; p++) {
+                        const nota = porMateria[materia][p];
+                        if (nota !== '-') {
+                            sumaPonderada += parseFloat(nota) * pesos[p];
+                        }
+                    }
+                    const notaFinal = (sumaPonderada > 0) ? sumaPonderada.toFixed(1) : '-';
+
+                    filasTabla.push([
+                        limpiar(materia),
+                        porMateria[materia][1],
+                        porMateria[materia][2],
+                        porMateria[materia][3],
+                        porMateria[materia][4],
+                        notaFinal
+                    ]);
+                }
+
+                doc.autoTable({
+                    startY: 72,
+                    head: [['ASIGNATURA', 'P1 (15%)', 'P2 (20%)', 'P3 (30%)', 'P4 (35%)', 'PONDERADO']],
+                    body: filasTabla,
+                    theme: 'grid',
+                    headStyles: { fillColor: [240, 240, 240], textColor: [0,0,0], fontStyle: 'bold' },
+                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 3, halign: 'center' },
+                    columnStyles: {
+                        0: { halign: 'left', fontStyle: 'bold', cellWidth: 60 }
+                    }
+                });
+
+                let finalY = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(10);
+                doc.text("OBSERVACIONES:", 15, finalY);
+                doc.rect(15, finalY + 3, 185, 25);
+
+                finalY += 45;
+                doc.line(30, finalY, 80, finalY);
+                doc.text("DOCENTE", 55, finalY + 5, { align: 'center' });
+
+                doc.line(130, finalY, 180, finalY);
+                doc.text("COORDINADORA", 155, finalY + 5, { align: 'center' });
+
+                doc.save(`Boletin_${limpiar(estudiante.apellidos)}_${limpiar(estudiante.nombres)}.pdf`);
+
+            } catch (error) {
+                alert('Error al generar el PDF: ' + error.message);
+            }
+        }
+
+        function loadImageAsBase64(url) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'Anonymous';
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.onerror = reject;
+                img.src = window.location.origin + url;
+            });
+        }
+
+        function salir() {
+            localStorage.removeItem('rol');
+            localStorage.removeItem('email');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

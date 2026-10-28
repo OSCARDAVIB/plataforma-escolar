@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Estudiante</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Barra Superior */
+        .barra {
+            background: #16a34a; color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .barra h1 { font-size: 20px; }
+        .barra button {
+            background: white; color: #16a34a; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
+        }
+        .barra button:hover { background: #dcfce7; }
+
+        /* Menú de Pestañas */
+        .menu-tabs {
+            background: white; padding: 0 30px; display: flex; gap: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 15px 20px;
+            font-size: 15px; font-weight: bold; color: #64748b; cursor: pointer;
+            border-bottom: 3px solid transparent; transition: 0.2s;
+        }
+        .tab-btn:hover { color: #16a34a; background: #f0fdf4; }
+        .tab-btn.active { color: #16a34a; border-bottom-color: #16a34a; }
+
+        /* Contenedor Principal */
+        .contenido { flex: 1; max-width: 900px; margin: 30px auto; padding: 0 20px; width: 100%; }
+        
+        /* Secciones */
+        .seccion { display: none; animation: fadeIn 0.3s; }
+        .seccion.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas */
+        .tarjeta {
+            background: white; padding: 25px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .tarjeta h2 { color: #1e293b; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;}
+
+        /* =========================================
+           ESTILOS DE TAREAS (TARJETAS EN CUADRÍCULA)
+           ========================================= */
+        .grid-tareas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .tarea-item {
+            background: #f0fdf4; border-left: 4px solid #16a34a;
+            padding: 15px; border-radius: 6px;
+            display: flex; flex-direction: column;
+        }
+        .tarea-item h3 { color: #14532d; margin-bottom: 5px; font-size: 16px; }
+        .tarea-item p { color: #166534; font-size: 14px; margin-bottom: 8px; flex-grow: 1; }
+        .tarea-item .fecha { font-size: 13px; color: #dc2626; font-weight: bold; }
+        
+        /* Zona de entrega */
+        .zona-entrega { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #86efac; }
+        .zona-entrega input[type="file"] { margin-bottom: 10px; font-size: 13px; width: 100%; }
+        .zona-entrega textarea {
+            width: 100%; padding: 8px; margin-bottom: 10px;
+            border: 1px solid #86efac; border-radius: 6px;
+            font-size: 13px; font-family: Arial, sans-serif; min-height: 50px;
+        }
+        .boton-subir {
+            background: #16a34a; color: white; border: none;
+            padding: 10px 20px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; width: 100%;
+        }
+        .boton-subir:hover { background: #14532d; }
+        
+        .estado-ok {
+            background: #dcfce7; color: #14532d; padding: 12px;
+            border-radius: 6px; font-size: 13px; margin-top: 10px;
+        }
+
+        /* Utilidades */
+        .vacio { color: #94a3b8; text-align: center; padding: 20px; font-style: italic; }
+        .cargando { color: #16a34a; text-align: center; padding: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="barra">
+        <h1>🎓 Panel Estudiante</h1>
+        <button onclick="salir()">Cerrar sesión</button>
+    </div>
+
+    <!-- MENÚ DE PESTAÑAS -->
+    <div class="menu-tabs">
+        <button class="tab-btn active" onclick="cambiarTab('inicio', event)">🏠 Inicio</button>
+        <button class="tab-btn" onclick="cambiarTab('tareas', event)">📚 Mis Tareas</button>
+        <button class="tab-btn" onclick="cambiarTab('notas', event)">📊 Mis Notas</button>
+    </div>
+
+    <div class="contenido">
+
+        <!-- ==================== SECCIÓN: INICIO ==================== -->
+        <div id="sec-inicio" class="seccion active">
+            <div class="tarjeta">
+                <h2>¡Hola de nuevo!</h2>
+                <p style="color:#64748b; line-height:1.6; font-size: 16px;">
+                    Nos alegra verte por aquí.<br><br>
+                    <strong id="nombreEstudiante" style="font-size: 20px; color: #16a34a;">Cargando...</strong>
+                </p>
+                <hr style="margin: 20px 0; border: 1px dashed #cbd5e1;">
+                <p style="color:#64748b; line-height:1.6;">
+                    Revisa tus tareas pendientes en la pestaña <strong>"Mis Tareas"</strong> y consulta tus calificaciones en <strong>"Mis Notas"</strong>.
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== SECCIÓN: TAREAS ==================== -->
+        <div id="sec-tareas" class="seccion">
+            <div class="tarjeta">
+                <h2>📚 Tareas asignadas</h2>
+                <div id="listaTareas" class="grid-tareas cargando">Cargando tareas...</div>
+            </div>
+        </div>
+
+        <!-- ==================== SECCIÓN: NOTAS ==================== -->
+        <div id="sec-notas" class="seccion">
+            <div class="tarjeta">
+                <h2>📊 Mis Notas por Período</h2>
+                <div id="listaNotas">Cargando notas...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 1. Validar seguridad
+        if (localStorage.getItem('rol') !== 'estudiante') {
+            alert('Debes iniciar sesión como estudiante');
+            window.location.href = 'index.html';
+        }
+
+        const miEmail = localStorage.getItem('email') || 'estudiante@correo.com';
+
+        // 2. Lógica de las Pestañas
+        function cambiarTab(idTab, evento) {
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('sec-' + idTab).classList.add('active');
+            if (evento) evento.target.classList.add('active');
+        }
+
+        // 3. Llamadas iniciales
+        cargarInfoEstudiante();
+        cargarTodo();
+        cargarMisNotas();
+
+        // ==========================================
+        // FUNCIÓN PARA MOSTRAR EL NOMBRE DEL ESTUDIANTE
+        // ==========================================
+        async function cargarInfoEstudiante() {
+            try {
+                const res = await fetch('/api/estudiantes');
+                const estudiantes = await res.json();
+                
+                // Buscar al estudiante por su email de sesión
+                const yo = estudiantes.find(e => e.email === miEmail);
+                
+                if (yo) {
+                    const nombreCompleto = `${yo.nombres} ${yo.apellidos}`;
+                    document.getElementById('nombreEstudiante').textContent = nombreCompleto;
+                } else {
+                    document.getElementById('nombreEstudiante').textContent = 'Estudiante';
+                }
+            } catch (error) {
+                document.getElementById('nombreEstudiante').textContent = 'Estudiante';
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE TAREAS Y ENTREGAS
+        // ==========================================
+        async function cargarTodo() {
+            try {
+                const resTareas = await fetch('/api/tareas');
+                const tareas = await resTareas.json();
+                const resEntregas = await fetch('/api/entregas');
+                const entregas = await resEntregas.json();
+
+                mostrarTareas(tareas, entregas);
+            } catch (error) {
+                document.getElementById('listaTareas').innerHTML = '<p class="vacio">Error de conexión</p>';
+            }
+        }
+
+        function mostrarTareas(tareas, entregas) {
+            const lista = document.getElementById('listaTareas');
+
+            if (tareas.length === 0) {
+                lista.innerHTML = '<p class="vacio">Aún no hay tareas asignadas</p>';
+                return;
+            }
+
+            tareas.sort((a, b) => b.id - a.id);
+
+            lista.innerHTML = tareas.map(t => {
+                const miEntrega = entregas.find(e => e.tareaId === t.id && e.emailEstudiante === miEmail);
+
+                let zona = '';
+                if (miEntrega) {
+                    if (miEntrega.calificacion !== null) {
+                        zona = `<div class="estado-ok" style="background:#d1fae5; border:1px solid #10b981;">
+                            ✅ Entregado: <strong>${miEntrega.nombreArchivo}</strong><br><br>
+                            ⭐ <strong>Nota: ${parseFloat(miEntrega.calificacion).toFixed(1)}/5</strong><br>
+                            💬 <em>${miEntrega.retroalimentacion || 'Sin comentarios'}</em>
+                        </div>`;
+                    } else {
+                        zona = `<div class="estado-ok">
+                            ✅ Ya entregaste: <strong>${miEntrega.nombreArchivo}</strong><br>
+                            <small>⏳ Esperando calificación...</small>
+                        </div>`;
+                    }
+                } else {
+                    zona = `
+                        <input type="file" id="archivo-${t.id}">
+                        <textarea id="comentario-${t.id}" placeholder="Comentario (opcional)..."></textarea>
+                        <button class="boton-subir" onclick="subirEntrega(${t.id})">Subir entrega</button>
+                    `;
+                }
+
+                return `
+                    <div class="tarea-item">
+                        <h3>${t.titulo}</h3>
+                        <p>${t.descripcion || 'Sin descripción'}</p>
+                        <span class="fecha">📅 Entrega: ${t.fecha || 'Sin fecha'}</span>
+                        <div class="zona-entrega">
+                            ${zona}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function subirEntrega(tareaId) {
+            const inputArchivo = document.getElementById('archivo-' + tareaId);
+            const comentario = document.getElementById('comentario-' + tareaId).value;
+
+            if (!inputArchivo.files || inputArchivo.files.length === 0) {
+                alert('Selecciona un archivo primero');
+                return;
+            }
+
+            const archivo = inputArchivo.files[0];
+            const formData = new FormData();
+            formData.append('archivo', archivo);
+            formData.append('tareaId', tareaId);
+            formData.append('emailEstudiante', miEmail);
+            formData.append('comentario', comentario);
+
+            try {
+                const respuesta = await fetch('/api/entregas', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (respuesta.ok) {
+                    alert('¡Entrega subida con éxito!');
+                    cargarTodo();
+                } else {
+                    alert('Error al subir');
+                }
+            } catch (error) {
+                alert('Error de conexión');
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE NOTAS
+        // ==========================================
+        async function cargarMisNotas() {
+            try {
+                const res = await fetch('/api/notas/' + miEmail);
+                const notas = await res.json();
+                const contenedor = document.getElementById('listaNotas');
+
+                if (notas.length === 0) {
+                    contenedor.innerHTML = '<p class="vacio">Aún no tienes notas registradas.</p>';
+                    return;
+                }
+
+                const porMateria = {};
+                notas.forEach(n => {
+                    if (!porMateria[n.materia]) porMateria[n.materia] = {};
+                    porMateria[n.materia][n.periodo] = n.nota;
+                });
+
+                let html = '<table style="width:100%; border-collapse:collapse; font-size:14px; margin-top:10px;">';
+                html += '<tr><th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9; text-align:left;">MATERIA</th><th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9;">P1</th><th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9;">P2</th><th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9;">P3</th><th style="border:1px solid #cbd5e1; padding:8px; background:#f1f5f9;">P4</th></tr>';
+                
+                for (const materia in porMateria) {
+                    html += `<tr><td style="border:1px solid #cbd5e1; padding:8px; font-weight:bold;">${materia}</td>`;
+                    for (let p = 1; p <= 4; p++) {
+                        const nota = porMateria[materia][p];
+                        html += `<td style="border:1px solid #cbd5e1; padding:8px; text-align:center;">${nota !== undefined ? parseFloat(nota).toFixed(1) : '-'}</td>`;
+                    }
+                    html += '</tr>';
+                }
+                html += '</table>';
+                contenedor.innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('listaNotas').innerHTML = '<p class="vacio">Error al cargar las notas</p>';
+            }
+        }
+
+        function salir() {
+            localStorage.removeItem('rol');
+            localStorage.removeItem('email');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

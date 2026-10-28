@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Docente - Plataforma Escolar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Barra Superior */
+        .barra {
+            background: #2563eb; color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .barra h1 { font-size: 20px; }
+        .barra button {
+            background: white; color: #2563eb; border: none;
+            padding: 8px 16px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
+        }
+        .barra button:hover { background: #e2e8f0; }
+
+        /* Menú de Pestañas */
+        .menu-tabs {
+            background: white; padding: 0 30px; display: flex; gap: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 15px 20px;
+            font-size: 15px; font-weight: bold; color: #64748b; cursor: pointer;
+            border-bottom: 3px solid transparent; transition: 0.2s;
+        }
+        .tab-btn:hover { color: #2563eb; background: #f8fafc; }
+        .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+        /* Contenedor Principal */
+        .contenido { flex: 1; max-width: 900px; margin: 30px auto; padding: 0 20px; width: 100%; }
+        
+        /* Secciones */
+        .seccion { display: none; animation: fadeIn 0.3s; }
+        .seccion.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas */
+        .tarjeta {
+            background: white; padding: 25px; border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .tarjeta h2 { color: #1e293b; margin-bottom: 15px; font-size: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;}
+
+        /* Formularios */
+        input, textarea, select {
+            width: 100%; padding: 10px; margin-bottom: 12px;
+            border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
+        input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+        button.primario {
+            background: #2563eb; color: white; border: none;
+            padding: 12px 24px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; font-size: 15px; transition: 0.2s;
+        }
+        button.primario:hover { background: #1e40af; }
+
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 6px 10px; border: 1px solid #cbd5e1; text-align: left; vertical-align: middle; }
+        th { background: #f1f5f9; color: #1e293b; font-weight: bold; font-size: 14px; }
+        td { color: #1e293b; font-size: 14px; }
+
+        .nota-input { 
+            width: 100%; max-width: 70px; padding: 4px; 
+            text-align: center; font-weight: bold; font-size: 14px; 
+            border: 1px solid #cbd5e1; border-radius: 4px; 
+            height: 28px; box-sizing: border-box; background: white; color: #1e293b;
+        }
+        .nota-input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+
+        /* Utilidades */
+        .vacio { color: #94a3b8; text-align: center; padding: 20px; font-style: italic; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="barra">
+        <h1>👨‍🏫 Panel Docente</h1>
+        <button onclick="salir()">Cerrar sesión</button>
+    </div>
+
+    <div class="menu-tabs">
+        <button class="tab-btn active" onclick="cambiarTab('inicio', event)">🏠 Inicio</button>
+        <button class="tab-btn" onclick="cambiarTab('tareas', event)">➕ Tareas</button>
+        <button class="tab-btn" onclick="cambiarTab('estudiantes', event)">👥 Estudiantes</button>
+        <button class="tab-btn" onclick="cambiarTab('calificaciones', event)">📝 Calificaciones</button>
+        <button class="tab-btn" onclick="cambiarTab('config', event)">⚙️ Configuración</button>
+    </div>
+
+    <div class="contenido">
+
+        <div id="sec-inicio" class="seccion active">
+            <div class="tarjeta">
+                <h2>Bienvenido/a al Panel Docente</h2>
+                <p style="color:#64748b; line-height:1.6;">
+                    Usa el menú superior para navegar entre las diferentes herramientas de la plataforma.<br><br>
+                    <strong>💡 Tip:</strong> Puedes crear tareas, administrar a tus estudiantes, y subir las notas de todo el curso de forma rápida usando la pestaña de <em>Calificaciones</em>.
+                </p>
+            </div>
+        </div>
+
+        <div id="sec-tareas" class="seccion">
+            <div class="tarjeta">
+                <h2>➕ Crear nueva tarea</h2>
+                <input type="text" id="titulo" placeholder="Título de la tarea">
+                <textarea id="descripcion" placeholder="Descripción..."></textarea>
+                <input type="date" id="fecha">
+                <button class="primario" onclick="crearTarea()">Crear tarea</button>
+            </div>
+
+            <div class="tarjeta">
+                <h2>📋 Mis tareas y entregas</h2>
+                <div id="listaTareas">Cargando...</div>
+            </div>
+        </div>
+
+        <div id="sec-estudiantes" class="seccion">
+            <div class="tarjeta">
+                <h2>👥 Agregar Nuevo Estudiante</h2>
+                <div class="grid-2">
+                    <input type="text" id="estNombres" placeholder="Nombres">
+                    <input type="text" id="estApellidos" placeholder="Apellidos">
+                    <input type="email" id="estEmail" placeholder="Correo del estudiante">
+                    <input type="text" id="estCurso" placeholder="Curso (ej: 5B)">
+                    <input type="email" id="estAcudiente" placeholder="Correo del acudiente">
+                    <input type="text" id="estPassword" placeholder="Contraseña (estudiante y padre)">
+                </div>
+                <button class="primario" onclick="crearEstudiante()">➕ Agregar Estudiante</button>
+                <div id="mensajeEstudiante" style="margin-top: 10px; font-size: 14px; font-weight: bold;"></div>
+            </div>
+
+            <div class="tarjeta">
+                <h2>📋 Listado de Estudiantes</h2>
+                <div id="listaEstudiantes">Cargando...</div>
+            </div>
+        </div>
+
+        <div id="sec-calificaciones" class="seccion">
+            <div class="tarjeta">
+                <h2>📝 Planilla de Calificaciones</h2>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">
+                    Selecciona el curso, la materia y el período para cargar la planilla.
+                </p>
+                
+                <div class="grid-2" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div>
+                        <label style="font-size:12px; font-weight:bold; color:#475569;">Curso:</label>
+                        <input type="text" id="filtroCurso" placeholder="Ej: 5B" onchange="cargarPlanilla()">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:bold; color:#475569;">Asignatura:</label>
+                        <select id="filtroMateria" onchange="cargarPlanilla()">
+                            <option value="MATEMATICAS">Matemáticas</option>
+                            <option value="ESPANOL">Español</option>
+                            <option value="INGLES">Inglés</option>
+                            <option value="CIENCIAS NATURALES">Ciencias Naturales</option>
+                            <option value="CIENCIAS SOCIALES">Ciencias Sociales</option>
+                            <option value="EDUCACION ARTISTICA">Educación Artística</option>
+                            <option value="EDUCACION FISICA">Educación Física</option>
+                            <option value="ETICA Y VALORES">Ética y Valores</option>
+                            <option value="EDUCACION RELIGIOSA">Educación Religiosa</option>
+                            <option value="TECNOLOGIA E INFORMATICA">Tecnología e Informática</option>
+                            <option value="COMPORTAMIENTO">Comportamiento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:bold; color:#475569;">Período:</label>
+                        <select id="filtroPeriodo" onchange="cargarPlanilla()">
+                            <option value="1">Período 1 (15%)</option>
+                            <option value="2">Período 2 (20%)</option>
+                            <option value="3">Período 3 (30%)</option>
+                            <option value="4">Período 4 (35%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <div id="planillaContenedor">
+                        <p class="vacio">Escribe un curso para cargar la planilla (ej: 5B).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sec-config" class="seccion">
+            <div class="tarjeta">
+                <h2>⚙️ Configuración del Colegio (Para el Boletín)</h2>
+                <div class="grid-2">
+                    <input type="text" id="instNombre" placeholder="Nombre del Colegio">
+                    <input type="text" id="instNit" placeholder="NIT">
+                    <input type="text" id="instDane" placeholder="Código DANE">
+                    <input type="text" id="instResolucion" placeholder="Resolución de Aprobación">
+                    <input type="text" id="instDireccion" placeholder="Dirección">
+                    <input type="text" id="instTelefono" placeholder="Teléfono">
+                </div>
+                <button class="primario" onclick="guardarInstitucion()">💾 Guardar Datos</button>
+                <div id="mensajeInstitucion" style="margin-top: 10px; font-size: 14px; font-weight: bold;"></div>
+
+                <hr style="margin: 20px 0; border: 1px dashed #cbd5e1;">
+
+                <div class="grid-2">
+                    <div>
+                        <h3 style="font-size: 14px; margin-bottom: 5px;">Logo (Izquierda)</h3>
+                        <input type="file" id="inputLogo" accept="image/*" onchange="subirImagen('logo')">
+                    </div>
+                    <div>
+                        <h3 style="font-size: 14px; margin-bottom: 5px;">Escudo (Derecha)</h3>
+                        <input type="file" id="inputEscudo" accept="image/*" onchange="subirImagen('escudo')">
+                    </div>
+                </div>
+                <div id="mensajeImagen" style="margin-top: 10px; font-size: 14px; font-weight: bold;"></div>
+            </div>
+        </div>
+
+    </div>
+
+        <script>
+        // 1. Validación de sesión
+        if (localStorage.getItem('rol') !== 'docente') {
+            alert('Debes iniciar sesión como docente');
+            window.location.href = 'index.html';
+        }
+
+        // 2. Lógica de las Pestañas
+        function cambiarTab(idTab, evento) {
+            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sec-' + idTab).classList.add('active');
+            if (evento) evento.target.classList.add('active');
+        }
+
+        // 3. Llamadas iniciales
+        cargarTodo();
+        cargarEstudiantes();
+        cargarInstitucion();
+
+        // ==========================================
+        // FUNCIONES DE TAREAS
+        // ==========================================
+        async function cargarTodo() {
+            try {
+                const resTareas = await fetch('/api/tareas');
+                const tareas = await resTareas.json();
+                const resEntregas = await fetch('/api/entregas');
+                const entregas = await resEntregas.json();
+                mostrarTareas(tareas, entregas);
+            } catch (error) {
+                document.getElementById('listaTareas').innerHTML = '<p class="vacio">Error al cargar tareas</p>';
+            }
+        }
+
+        async function crearTarea() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const fecha = document.getElementById('fecha').value;
+
+            if (!titulo) { alert('Escribe un título'); return; }
+
+            try {
+                const respuesta = await fetch('/api/tareas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, descripcion, fecha })
+                });
+
+                if (respuesta.ok) {
+                    document.getElementById('titulo').value = '';
+                    document.getElementById('descripcion').value = '';
+                    document.getElementById('fecha').value = '';
+                    cargarTodo();
+                } else { alert('Error al crear la tarea'); }
+            } catch (error) { alert('Error de conexión'); }
+        }
+
+        function mostrarTareas(tareas, entregas) {
+            const lista = document.getElementById('listaTareas');
+            if (tareas.length === 0) {
+                lista.innerHTML = '<p class="vacio">Aún no has creado tareas</p>';
+                return;
+            }
+
+            tareas.sort((a, b) => b.id - a.id);
+
+            lista.innerHTML = tareas.map(t => {
+                const entregasDeEstaTarea = entregas.filter(e => e.tareaId === t.id);
+                let bloqueEntregas = '';
+                
+                if (entregasDeEstaTarea.length === 0) {
+                    bloqueEntregas = '<p style="color:#94a3b8; font-size:13px; font-style:italic;">Sin entregas todavía</p>';
+                } else {
+                    bloqueEntregas = entregasDeEstaTarea.map(e => {
+                        if (e.calificacion !== null) {
+                            return `
+                                <div style="background:#f8fafc; border-left:3px solid #2563eb; padding:10px; margin-bottom:5px; font-size:13px;">
+                                    <strong>📎 ${e.nombreArchivo}</strong> — ${e.emailEstudiante}<br>
+                                    <span style="color:#16a34a; font-weight:bold;">✅ Nota: ${parseFloat(e.calificacion).toFixed(1)}/5</span> | ${e.retroalimentacion}
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div style="background:#f8fafc; border-left:3px solid #f59e0b; padding:10px; margin-bottom:5px; font-size:13px;">
+                                    <strong>📎 ${e.nombreArchivo}</strong> — ${e.emailEstudiante}<br>
+                                    <div style="margin:5px 0;">💬 ${e.comentario || 'Sin comentario'}</div>
+                                    <input type="number" id="nota-${e.id}" placeholder="Nota" style="width:80px; display:inline-block; padding:4px;">
+                                    <input type="text" id="retro-${e.id}" placeholder="Retroalimentación" style="width:200px; display:inline-block; padding:4px;">
+                                    <button onclick="calificar(${e.id})" style="background:#16a34a; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer;">Calificar</button>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                }
+
+                return `
+                    <div style="border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:15px;">
+                        <h3 style="color:#1e293b; margin-bottom:5px;">${t.titulo}</h3>
+                        <p style="color:#64748b; font-size:13px; margin-bottom:10px;">${t.descripcion || 'Sin descripción'}</p>
+                        <span style="font-size:12px; color:#dc2626; font-weight:bold;">📅 Entrega: ${t.fecha || 'Sin fecha'}</span>
+                        <div style="margin-top:15px; padding-top:10px; border-top:1px dashed #e2e8f0;">
+                            <strong style="font-size:13px;">Entregas (${entregasDeEstaTarea.length}):</strong><br>
+                            <div style="margin-top:5px;">${bloqueEntregas}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function calificar(entregaId) {
+            const nota = document.getElementById(`nota-${entregaId}`).value;
+            const retro = document.getElementById(`retro-${entregaId}`).value.trim();
+            if (!nota) { alert('Escribe una nota'); return; }
+
+            try {
+                const respuesta = await fetch(`/api/entregas/${entregaId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ calificacion: nota, retroalimentacion: retro })
+                });
+                if (respuesta.ok) { cargarTodo(); }
+            } catch (error) { alert('Error de conexión'); }
+        }
+
+        // ==========================================
+        // FUNCIONES DE ESTUDIANTES (CREAR, EDITAR, BORRAR)
+        // ==========================================
+        async function cargarEstudiantes() {
+            try {
+                const res = await fetch('/api/estudiantes');
+                const estudiantes = await res.json();
+                const contenedor = document.getElementById('listaEstudiantes');
+                
+                if (estudiantes.length === 0) {
+                    contenedor.innerHTML = '<p class="vacio">Aún no hay estudiantes registrados.</p>';
+                    return;
+                }
+                
+                let html = '<table><tr><th>Apellidos y Nombres</th><th>Curso</th><th>Correo</th><th>Acciones</th></tr>';
+                
+                estudiantes.forEach(est => {
+                    html += `<tr>
+                        <td><strong>${est.apellidos}</strong>, ${est.nombres}</td>
+                        <td>${est.curso || '-'}</td>
+                        <td>${est.email || '-'}</td>
+                        <td style="white-space: nowrap;">
+                            <button onclick="prepararEdicion(${est.id})" style="background:#3b82f6; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">
+                                ✏️ Editar
+                            </button>
+                            <button onclick="resetearPassword(${est.id}, '${est.nombres}')" style="background:#f59e0b; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">
+                                🔑 Clave
+                            </button>
+                            <button onclick="eliminarEstudiante(${est.id}, '${est.nombres}')" style="background:#dc2626; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:12px;">
+                                🗑️
+                            </button>
+                        </td>
+                    </tr>`;
+                });
+                
+                html += '</table>';
+                contenedor.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('listaEstudiantes').innerHTML = '<p class="vacio">Error al cargar</p>';
+            }
+        }
+
+        async function crearEstudiante() {
+            const nombres = document.getElementById('estNombres').value.trim();
+            const apellidos = document.getElementById('estApellidos').value.trim();
+            const email = document.getElementById('estEmail').value.trim();
+            const curso = document.getElementById('estCurso').value.trim();
+            const acudiente = document.getElementById('estAcudiente').value.trim();
+            const password = document.getElementById('estPassword').value.trim();
+            const mensaje = document.getElementById('mensajeEstudiante');
+
+            if (!nombres || !apellidos) {
+                mensaje.textContent = '❌ Nombres y apellidos obligatorios';
+                mensaje.style.color = '#dc2626';
+                return;
+            }
+
+            try {
+                const respuesta = await fetch('/api/estudiantes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombres, apellidos, email, curso, acudiente_email: acudiente, password })
+                });
+
+                if (respuesta.ok) {
+                    mensaje.textContent = '✅ Estudiante agregado';
+                    mensaje.style.color = '#16a34a';
+                    document.getElementById('estNombres').value = '';
+                    document.getElementById('estApellidos').value = '';
+                    document.getElementById('estEmail').value = '';
+                    document.getElementById('estCurso').value = '';
+                    document.getElementById('estAcudiente').value = '';
+                    document.getElementById('estPassword').value = '';
+                    
+                    cargarEstudiantes();
+                } else {
+                    const data = await respuesta.json();
+                    mensaje.textContent = '❌ ' + (data.error || 'Error');
+                    mensaje.style.color = '#dc2626';
+                }
+            } catch (error) {
+                mensaje.textContent = '❌ Error de conexión';
+                mensaje.style.color = '#dc2626';
+            }
+        }
+
+        async function prepararEdicion(id) {
+            try {
+                const res = await fetch('/api/estudiantes');
+                const estudiantes = await res.json();
+                const est = estudiantes.find(e => e.id === id);
+
+                if (!est) { alert('No se encontró el estudiante'); return; }
+                
+                editarEstudiante(id, est.nombres, est.apellidos, est.email, est.curso, est.acudiente_email);
+            } catch (error) {
+                alert('Error al buscar los datos');
+            }
+        }
+
+        async function editarEstudiante(id, actualNombres, actualApellidos, actualEmail, actualCurso, actualAcudiente) {
+            const nombres = prompt("Nombres:", actualNombres || '');
+            if (nombres === null) return;
+
+            const apellidos = prompt("Apellidos:", actualApellidos || '');
+            if (apellidos === null) return;
+
+            const email = prompt("Correo del estudiante:", actualEmail || '');
+            if (email === null) return;
+
+            const curso = prompt("Curso:", actualCurso || '');
+            if (curso === null) return;
+
+            const acudiente = prompt("Correo del acudiente:", actualAcudiente || '');
+            if (acudiente === null) return;
+
+            try {
+                const res = await fetch(`/api/estudiantes/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        nombres: nombres, 
+                        apellidos: apellidos, 
+                        email: email, 
+                        curso: curso, 
+                        acudiente_email: acudiente 
+                    })
+                });
+
+                if (res.ok) {
+                    alert('✅ Estudiante actualizado correctamente');
+                    cargarEstudiantes();
+                } else {
+                    const data = await res.json();
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
+            }
+        }
+
+        async function eliminarEstudiante(id, nombre) {
+            const confirmar = confirm(`¿Estás seguro de eliminar a ${nombre}?`);
+            if (!confirmar) return;
+
+            try {
+                const res = await fetch(`/api/estudiantes/${id}`, { method: 'DELETE' });
+
+                if (res.ok) {
+                    alert('✅ Estudiante eliminado');
+                    cargarEstudiantes();
+                } else {
+                    alert('❌ Error al eliminar');
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
+            }
+        }
+
+        async function resetearPassword(id, nombre) {
+            const nuevaPassword = prompt(`Asignar nueva contraseña para ${nombre}:`);
+            
+            if (nuevaPassword === null) return;
+            if (nuevaPassword.length < 4) {
+                alert('La contraseña debe tener al menos 4 caracteres.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/estudiantes/${id}/password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nuevaPassword })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    alert(`✅ Contraseña actualizada.\n\nNueva clave: ${nuevaPassword}`);
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE CALIFICACIONES (PLANILLA)
+        // ==========================================
+        async function cargarPlanilla() {
+            const curso = document.getElementById('filtroCurso').value.trim().toUpperCase();
+            const materia = document.getElementById('filtroMateria').value;
+            const periodo = document.getElementById('filtroPeriodo').value;
+            const contenedor = document.getElementById('planillaContenedor');
+
+            if (!curso) {
+                contenedor.innerHTML = '<p class="vacio">Escribe un curso para cargar la planilla (ej: 5B).</p>';
+                return;
+            }
+
+            contenedor.innerHTML = '<p class="vacio">Cargando estudiantes...</p>';
+
+            try {
+                const resEst = await fetch('/api/estudiantes');
+                const todosEst = await resEst.json();
+                const estudiantesCurso = todosEst.filter(e => (e.curso || '').toUpperCase() === curso);
+
+                if (estudiantesCurso.length === 0) {
+                    contenedor.innerHTML = `<p class="vacio">No hay estudiantes en el curso "${curso}".</p>`;
+                    return;
+                }
+
+                const resNotas = await fetch('/api/notas/planilla/' + materia + '/' + periodo);
+                const notasGuardadas = await resNotas.json();
+
+                let html = `<table style="width:100%; border-collapse:collapse; margin-top:10px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align:center; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:8px; font-size:14px;">NO</th>
+                            <th style="text-align:left; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:8px; font-size:14px;">APELLIDOS Y NOMBRES</th>
+                            <th style="width: 100px; text-align:center; background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:8px; font-size:14px;">NOTA</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                estudiantesCurso.forEach((est, index) => {
+                    const notaObj = notasGuardadas.find(n => n.emailEstudiante === est.email);
+                    let valorNota = notaObj ? parseFloat(notaObj.nota).toFixed(1).replace('.', ',') : '';
+                    
+                    const colorFila = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+
+                    html += `
+                        <tr style="background: ${colorFila};">
+                            <td style="text-align:center; font-weight:bold; border:1px solid #cbd5e1; padding:6px; color:#1e293b;">${index + 1}</td>
+                            <td style="border:1px solid #cbd5e1; padding:6px; color:#1e293b; font-size:14px;"><strong>${est.apellidos}</strong>, ${est.nombres}</td>
+                            <td style="text-align:center; border:1px solid #cbd5e1; padding:4px;">
+                                <input type="text" class="nota-input" 
+                                       id="planilla-nota-${est.email}" 
+                                       value="${valorNota}" 
+                                       placeholder=""
+                                       onblur="this.value = this.value.replace('.', ',')">
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += `</tbody></table>
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button class="primario" onclick="guardarPlanilla('${materia}', ${periodo})">
+                            💾 Guardar Notas del Curso
+                        </button>
+                    </div>
+                    <div id="mensajePlanilla" style="margin-top: 10px; text-align: right; font-weight: bold; font-size: 14px;"></div>
+                `;
+
+                contenedor.innerHTML = html;
+
+            } catch (error) {
+                console.error(error);
+                contenedor.innerHTML = '<p class="vacio">Error al cargar la planilla</p>';
+            }
+        }
+
+        async function guardarPlanilla(materia, periodo) {
+            const inputs = document.querySelectorAll('.nota-input');
+            const mensaje = document.getElementById('mensajePlanilla');
+            
+            mensaje.textContent = 'Guardando...';
+            mensaje.style.color = '#2563eb';
+
+            let guardados = 0;
+            let errores = 0;
+
+            for (const input of inputs) {
+                const email = input.id.replace('planilla-nota-', '');
+                const notaValor = input.value.trim().replace(',', '.');
+
+                if (notaValor !== '') {
+                    try {
+                        const res = await fetch('/api/notas', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                emailEstudiante: email, 
+                                materia: materia, 
+                                periodo: parseInt(periodo), 
+                                nota: parseFloat(notaValor) 
+                            })
+                        });
+                        if (res.ok) guardados++;
+                        else errores++;
+                    } catch (e) {
+                        errores++;
+                    }
+                }
+            }
+
+            if (errores === 0) {
+                mensaje.textContent = `✅ ¡Se guardaron ${guardados} notas correctamente!`;
+                mensaje.style.color = '#16a34a';
+                setTimeout(() => mensaje.textContent = '', 3000);
+            } else {
+                mensaje.textContent = `⚠️ Se guardaron ${guardados} notas, pero hubo ${errores} errores.`;
+                mensaje.style.color = '#dc2626';
+            }
+        }
+
+        // ==========================================
+        // FUNCIONES DE CONFIGURACIÓN
+        // ==========================================
+        async function cargarInstitucion() {
+            try {
+                const res = await fetch('/api/institucion');
+                const data = await res.json();
+                if (data.nombre) document.getElementById('instNombre').value = data.nombre;
+                if (data.nit) document.getElementById('instNit').value = data.nit;
+                if (data.dane) document.getElementById('instDane').value = data.dane;
+                if (data.resolucion) document.getElementById('instResolucion').value = data.resolucion;
+                if (data.direccion) document.getElementById('instDireccion').value = data.direccion;
+                if (data.telefono) document.getElementById('instTelefono').value = data.telefono;
+            } catch (error) { console.error('Error al cargar institución'); }
+        }
+
+        async function guardarInstitucion() {
+            const nombre = document.getElementById('instNombre').value.trim();
+            const nit = document.getElementById('instNit').value.trim();
+            const dane = document.getElementById('instDane').value.trim();
+            const resolucion = document.getElementById('instResolucion').value.trim();
+            const direccion = document.getElementById('instDireccion').value.trim();
+            const telefono = document.getElementById('instTelefono').value.trim();
+            const mensaje = document.getElementById('mensajeInstitucion');
+
+            if (!nombre) { alert('El nombre del colegio es obligatorio'); return; }
+
+            try {
+                const res = await fetch('/api/institucion', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, nit, dane, resolucion, direccion, telefono })
+                });
+
+                if (res.ok) {
+                    mensaje.textContent = '✅ Datos guardados';
+                    mensaje.style.color = '#16a34a';
+                } else {
+                    mensaje.textContent = '❌ Error al guardar';
+                    mensaje.style.color = '#dc2626';
+                }
+            } catch (error) {
+                mensaje.textContent = '❌ Error de conexión';
+                mensaje.style.color = '#dc2626';
+            }
+        }
+
+        async function subirImagen(tipo) {
+            const input = document.getElementById(tipo === 'logo' ? 'inputLogo' : 'inputEscudo');
+            const mensaje = document.getElementById('mensajeImagen');
+            if (!input.files || input.files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('imagen', input.files[0]);
+
+            try {
+                const res = await fetch(`/api/institucion/imagen/${tipo}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    mensaje.textContent = `✅ Imagen subida`;
+                    mensaje.style.color = '#16a34a';
+                } else {
+                    mensaje.textContent = '❌ Error al subir';
+                    mensaje.style.color = '#dc2626';
+                }
+            } catch (error) {
+                mensaje.textContent = '❌ Error de conexión';
+                mensaje.style.color = '#dc2626';
+            }
+        }
+
+        function salir() {
+            localStorage.removeItem('rol');
+            localStorage.removeItem('email');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

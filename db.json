@@ -1,0 +1,24 @@
+{
+  "tareas": [
+    {
+      "id": 1792987631584,
+      "titulo": "Tecnología",
+      "descripcion": "Elabora un carrito con botellas",
+      "fecha": "2026-10-29",
+      "creada": "2026-10-26T04:07:11.584Z"
+    }
+  ],
+  "entregas": [
+    {
+      "id": 1792987879969,
+      "tareaId": 1792987631584,
+      "emailEstudiante": "rimoba@gmail.com",
+      "comentario": "",
+      "nombreArchivo": "InfografÃ­a educativa sobre grÃ¡ficos de datos.png",
+      "archivoGuardado": "1792987879944-InfografÃ­a educativa sobre grÃ¡ficos de datos.png",
+      "fechaEntrega": "2026-10-26T04:11:19.970Z",
+      "calificacion": 4,
+      "retroalimentacion": "Excelente, sigue así, si cumples con tus tareas llegaras lejos."
+    }
+  ]
+}
