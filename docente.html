@@ -305,7 +305,17 @@
                             </button>
                         </div>
                     `;
-                } else { ... }
+                    if (entregasDeEstaTarea.length === 0) {
+                    // Botón para tareas de cuaderno (sin entregas digitales)
+                    bloqueEntregas = `
+                        <div style="background:#f8fafc; border:1px dashed #cbd5e1; padding:10px; border-radius:6px; text-align:center;">
+                            <p style="color:#64748b; font-size:13px; margin-bottom:8px;">Sin entregas digitales todavía.</p>
+                            <button onclick="marcarEntregaClase(${t.id})" style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">
+                                📝 Registrar entrega en clase
+                            </button>
+                        </div>
+                    `;
+                } else {
                     bloqueEntregas = entregasDeEstaTarea.map(e => {
                         if (e.calificacion !== null) {
                             return `
