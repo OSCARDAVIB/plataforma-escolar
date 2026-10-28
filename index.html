@@ -11,10 +11,30 @@
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; padding: 20px;
         }
-        .caja {
-            background: white; padding: 40px; border-radius: 12px;
+        .        .caja {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 100%; max-width: 400px;
+            width: 90%; /* Ocupa casi todo el ancho de la pantalla en celular */
+            max-width: 400px;
+        }
+
+        /* Ajustes especiales para celulares */
+        @media (max-width: 480px) {
+            .caja {
+                padding: 25px; /* Menos espacio interno para que quepa bien */
+                width: 95%;    /* Aprovecha aún más el ancho */
+            }
+            h1 { font-size: 22px; } /* Título un poco más pequeño */
+            input, select {
+                padding: 14px; /* Campos más altos para que sea fácil tocar */
+                font-size: 16px; /* Evita que el celular haga zoom automático al escribir */
+            }
+            button {
+                padding: 16px; /* Botón más grande y fácil de tocar */
+                font-size: 17px;
+            }
         }
         h1 { color: #2563eb; text-align: center; margin-bottom: 10px; }
         .subtitulo { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
