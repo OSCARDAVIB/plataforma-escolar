@@ -2,59 +2,70 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mi Plataforma Escolar</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
         body {
-            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #2563eb, #1e40af);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-        .        .caja {
-            background: white;
+        
+        .caja {
+            background: white; /* El fondo blanco que se había perdido */
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            width: 90%; /* Ocupa casi todo el ancho de la pantalla en celular */
+            width: 100%;
             max-width: 400px;
         }
 
-        /* Ajustes especiales para celulares */
-        @media (max-width: 480px) {
-            .caja {
-                padding: 25px; /* Menos espacio interno para que quepa bien */
-                width: 95%;    /* Aprovecha aún más el ancho */
-            }
-            h1 { font-size: 22px; } /* Título un poco más pequeño */
-            input, select {
-                padding: 14px; /* Campos más altos para que sea fácil tocar */
-                font-size: 16px; /* Evita que el celular haga zoom automático al escribir */
-            }
-            button {
-                padding: 16px; /* Botón más grande y fácil de tocar */
-                font-size: 17px;
-            }
-        }
-        h1 { color: #2563eb; text-align: center; margin-bottom: 10px; }
+        h1 { color: #2563eb; text-align: center; margin-bottom: 10px; font-size: 24px; }
         .subtitulo { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        
         label { display: block; margin-bottom: 8px; color: #333; font-weight: bold; font-size: 14px; }
         input, select {
             width: 100%; padding: 12px; margin-bottom: 20px;
             border: 1px solid #ccc; border-radius: 6px; font-size: 15px;
+            font-family: Arial, sans-serif;
         }
+        
         button {
             width: 100%; padding: 14px; background: #2563eb; color: white;
             border: none; border-radius: 6px; font-size: 16px;
-            font-weight: bold; cursor: pointer;
+            font-weight: bold; cursor: pointer; transition: 0.2s;
         }
         button:hover { background: #1e40af; }
+        
         .mensaje {
             margin-top: 20px; padding: 12px; border-radius: 6px;
             text-align: center; font-size: 14px; display: none;
         }
         .mensaje.ok { background: #d1fae5; color: #065f46; display: block; }
         .mensaje.error { background: #fee2e2; color: #991b1b; display: block; }
+
+        /* =========================================
+           DISEÑO ADAPTABLE PARA CELULARES
+           ========================================= */
+        @media (max-width: 480px) {
+            .caja {
+                padding: 25px 20px; /* Un poco menos de espacio interno */
+                width: 95%;         /* Ocupa casi todo el ancho */
+            }
+            h1 { font-size: 22px; }
+            input, select {
+                padding: 15px;      /* Campos más altos para tocar fácil */
+                font-size: 16px;    /* Evita que el celular haga zoom */
+            }
+            button {
+                padding: 16px;      /* Botón más grande */
+                font-size: 17px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -105,7 +116,6 @@
                 if (res.ok) {
                     mostrarMensaje(`¡Bienvenido/a!`, 'ok');
                     
-                    // Guardamos la sesión
                     localStorage.setItem('rol', data.rol);
                     localStorage.setItem('email', data.email);
 
