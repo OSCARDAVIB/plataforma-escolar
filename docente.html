@@ -296,8 +296,16 @@
                 let bloqueEntregas = '';
                 
                 if (entregasDeEstaTarea.length === 0) {
-                    bloqueEntregas = '<p style="color:#94a3b8; font-size:13px; font-style:italic;">Sin entregas todavía</p>';
-                } else {
+                    // Si no hay entregas, mostramos un botón para que el docente registre la entrega física
+                    bloqueEntregas = `
+                        <div style="background:#f8fafc; border:1px dashed #cbd5e1; padding:10px; border-radius:6px; text-align:center;">
+                            <p style="color:#64748b; font-size:13px; margin-bottom:8px;">Ningún estudiante ha entregado aún (o es tarea de cuaderno).</p>
+                            <button onclick="marcarEntregaClase(${t.id})" style="background:#f59e0b; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-size:12px; font-weight:bold;">
+                                📝 Marcar recibido en clase
+                            </button>
+                        </div>
+                    `;
+                } else { ... }
                     bloqueEntregas = entregasDeEstaTarea.map(e => {
                         if (e.calificacion !== null) {
                             return `
@@ -729,6 +737,38 @@
             } catch (error) {
                 mensaje.textContent = '❌ Error de conexión';
                 mensaje.style.color = '#dc2626';
+            }
+        }
+
+                // --- MARCAR ENTREGA EN CLASE ---
+        async function marcarEntregaClase(tareaId) {
+            const emailEstudiante = prompt("Escribe el correo del estudiante que entregó en clase:");
+            
+            if (!emailEstudiante) return; // Si cancela o deja vacío, salimos
+
+            try {
+                // Creamos una entrega "fantasma" para que el padre vea que ya se entregó
+                const formData = new FormData();
+                formData.append('tareaId', tareaId);
+                formData.append('emailEstudiante', emailEstudiante.trim());
+                formData.append('comentario', 'Entregado en clase (cuaderno físico)');
+                // Simulamos un archivo vacío
+                const blob = new Blob(["Entregado en clase"], { type: 'text/plain' });
+                formData.append('archivo', blob, 'Entrega_en_clase.txt');
+
+                const respuesta = await fetch('/api/entregas', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (respuesta.ok) {
+                    alert('✅ Entrega en clase registrada correctamente');
+                    cargarTodo(); // Recargar la lista de tareas
+                } else {
+                    alert('❌ Error al registrar la entrega');
+                }
+            } catch (error) {
+                alert('❌ Error de conexión');
             }
         }
 
