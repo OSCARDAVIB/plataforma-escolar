@@ -15,11 +15,25 @@ app.use(express.static(__dirname));
 
 // Configurar la ruta para el disco persistente de Render
 const DIRECTORIO_DATOS = process.env.RENDER ? '/var/data' : '.';
+const CARPETA_UPLOADS = path.join(DIRECTORIO_DATOS, 'uploads');
 
-// Crear la carpeta de uploads (usando path)
-if (!fs.existsSync(path.join(DIRECTORIO_DATOS, 'uploads'))) {
-    fs.mkdirSync(path.join(DIRECTORIO_DATOS, 'uploads'), { recursive: true });
+// Crear la carpeta de uploads si no existe
+if (!fs.existsSync(CARPETA_UPLOADS)) {
+    fs.mkdirSync(CARPETA_UPLOADS, { recursive: true });
 }
+
+// Servir los archivos subidos
+app.use('/uploads', express.static(CARPETA_UPLOADS));
+
+// Configuración de subida de archivos
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, CARPETA_UPLOADS);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + file.originalname);
+    }
+});
 
 // Servir los archivos subidos
 app.use('/uploads', express.static(path.join(DIRECTORIO_DATOS, 'uploads')));
