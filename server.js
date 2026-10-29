@@ -13,13 +13,17 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static('uploads'));
 
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
+const DIRECTORIO_DATOS = process.env.RENDER ? '/var/data' : '.';
+
+if (!fs.existsSync(path.join(DIRECTORIO_DATOS, 'uploads'))) {
+    fs.mkdirSync(path.join(DIRECTORIO_DATOS, 'uploads'), { recursive: true });
 }
 
 // Configuración de subida
 const storage = multer.diskStorage({
-    destination: './uploads/',
+    destination: (req, file, cb) => {
+        cb(null, path.join(DIRECTORIO_DATOS, 'uploads'));
+    },
     filename: (req, file, cb) => {
         cb(null, Date.now() + '-' + file.originalname);
     }
