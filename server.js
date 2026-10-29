@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 const db = require('./database'); // <-- Traemos la base de datos
 const bcrypt = require('bcryptjs');
 
