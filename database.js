@@ -3,7 +3,14 @@ const path = require('path');
 
 // Esto crea (o abre) el archivo plataforma.db en la carpeta
 const dbPath = process.env.RENDER ? '/var/data/plataforma.db' : './plataforma.db';
-const db = new sqlite3.Database(dbPath, (err) => { ... });
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('Error al abrir la base de datos:', err.message);
+    } else {
+        console.log('✅ Conectado a la base de datos SQLite');
+        crearTablas();
+    }
+});
 
 // Aquí definimos las "cajas" donde guardaremos los datos
 function crearTablas() {
