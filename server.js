@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // Configurar la ruta para el disco persistente de Render
-const DIRECTORIO_DATOS = process.env.RENDER ? '/var/data' : '.';
+const DIRECTORIO_DATOS = process.env.RENDER ? '/opt/render/project/src' : '.';
 const CARPETA_UPLOADS = path.join(DIRECTORIO_DATOS, 'uploads');
 
 // Crear la carpeta de uploads si no existe
